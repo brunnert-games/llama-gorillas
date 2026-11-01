@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Spuck-Lamas</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="buehne">
+    <canvas id="spielfeld" aria-label="Spielfeld"></canvas>
+
+    <!-- Punktetafel -->
+    <div id="hud" class="versteckt">
+      <div class="tafel links" id="tafel-0">
+        <canvas class="lama-bild" id="bild-0" width="160" height="160"></canvas>
+        <div>
+          <div class="tafel-name" id="name-0"></div>
+          <div class="punkte" id="punkte-0"></div>
+        </div>
+      </div>
+      <div class="tafel rechts" id="tafel-1">
+        <canvas class="lama-bild" id="bild-1" width="160" height="160"></canvas>
+        <div>
+          <div class="tafel-name" id="name-1"></div>
+          <div class="punkte" id="punkte-1"></div>
+        </div>
+      </div>
+      <div class="oben-knoepfe">
+        <button class="rund" id="ton-knopf" aria-label="Ton an oder aus">🔊</button>
+        <button class="rund" id="pause-knopf" aria-label="Pause">⏸</button>
+      </div>
+    </div>
+
+    <!-- Zielen -->
+    <div id="steuerung" class="versteckt">
+      <div class="wer"><span id="wer-dran"></span><small>ist dran</small></div>
+
+      <div class="regler-feld">
+        <label for="winkel">Richtung <b id="winkel-zahl">45°</b></label>
+        <div class="regler-zeile">
+          <button class="klein" data-aendere="winkel" data-richtung="-1" aria-label="Richtung flacher">−</button>
+          <input type="range" id="winkel" min="-20" max="120" value="45">
+          <button class="klein" data-aendere="winkel" data-richtung="1" aria-label="Richtung steiler">+</button>
+        </div>
+      </div>
+
+      <div class="regler-feld">
+        <label for="kraft">Stärke <b id="kraft-zahl">60</b></label>
+        <div class="regler-zeile">
+          <button class="klein" data-aendere="kraft" data-richtung="-1" aria-label="Weniger Stärke">−</button>
+          <input type="range" id="kraft" min="5" max="100" value="60">
+          <button class="klein" data-aendere="kraft" data-richtung="1" aria-label="Mehr Stärke">+</button>
+        </div>
+      </div>
+
+      <button id="spuck-knopf">Ptui!</button>
+    </div>
+
+    <div id="banner"></div>
+
+    <!-- Hauptmenü -->
+    <section id="menue" class="schicht">
+      <div class="menue-karte">
+        <h1>Spuck-Lamas</h1>
+
+        <div class="spalten">
+          <div class="spalte">
+            <h2>Wer spielt?</h2>
+            <div class="reihe">
+              <button class="wahl" data-gruppe="modus" data-wert="computer"><b>Gegen den Computer</b><small>1 Mensch</small></button>
+              <button class="wahl" data-gruppe="modus" data-wert="zwei"><b>Zu zweit</b><small>2 Menschen</small></button>
+            </div>
+
+            <div id="stufen">
+              <h2>Wie schlau ist der Computer?</h2>
+              <div class="reihe">
+                <button class="wahl" data-gruppe="stufe" data-wert="leicht"><b>Leicht</b><small class="sterne">★☆☆</small></button>
+                <button class="wahl" data-gruppe="stufe" data-wert="mittel"><b>Mittel</b><small class="sterne">★★☆</small></button>
+                <button class="wahl" data-gruppe="stufe" data-wert="schwer"><b>Schwer</b><small class="sterne">★★★</small></button>
+              </div>
+            </div>
+
+            <h2>Namen</h2>
+            <div class="reihe">
+              <input type="text" id="name1" maxlength="14" aria-label="Name von Spieler 1">
+              <div id="name2-feld" class="streck"><input type="text" id="name2" maxlength="14" aria-label="Name von Spieler 2"></div>
+            </div>
+          </div>
+
+          <div class="spalte">
+            <h2>Wo spielt ihr?</h2>
+            <div class="reihe">
+              <button class="wahl welt" data-gruppe="biom" data-wert="anden">
+                <canvas id="vorschau-anden" width="320" height="180"></canvas>
+                <b>Anden</b>
+              </button>
+              <button class="wahl welt" data-gruppe="biom" data-wert="alpen">
+                <canvas id="vorschau-alpen" width="320" height="180"></canvas>
+                <b>Alpen</b>
+              </button>
+            </div>
+
+            <div class="reihe unten">
+              <div class="streck">
+                <h2>Treffer zum Sieg</h2>
+                <div class="reihe">
+                  <button class="wahl mini" data-gruppe="siege" data-wert="1"><b>1</b></button>
+                  <button class="wahl mini" data-gruppe="siege" data-wert="3"><b>3</b></button>
+                  <button class="wahl mini" data-gruppe="siege" data-wert="5"><b>5</b></button>
+                </div>
+              </div>
+              <div class="streck">
+                <h2>Wind</h2>
+                <div class="reihe">
+                  <button class="wahl mini" data-gruppe="wind" data-wert="an"><b>An</b></button>
+                  <button class="wahl mini" data-gruppe="wind" data-wert="aus"><b>Aus</b></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button id="start">Los geht’s!</button>
+        <p class="tipp">↑ ↓ Richtung · ← → Stärke · Leertaste spucken · oder einfach ins Bild tippen und ziehen</p>
+      </div>
+    </section>
+
+    <!-- Pause -->
+    <section id="pause" class="schicht versteckt">
+      <div class="kasten">
+        <h2 class="gross">Pause</h2>
+        <button class="gross-knopf" id="weiter">Weiterspielen</button>
+        <button class="gross-knopf zweit" id="pause-menue">Zum Hauptmenü</button>
+      </div>
+    </section>
+
+    <!-- Spielende -->
+    <section id="ende" class="schicht durchsichtig versteckt">
+      <div class="kasten">
+        <canvas id="sieger-bild" width="240" height="240"></canvas>
+        <h2 class="gross" id="sieger"></h2>
+        <p id="stand"></p>
+        <button class="gross-knopf" id="nochmal">Nochmal spielen</button>
+        <button class="gross-knopf zweit" id="ende-menue">Zum Hauptmenü</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Die Reihenfolge ist wichtig: Spätere Dateien benutzen die früheren. -->
+  <script src="js/einstellungen.js"></script>
+  <script src="js/hilfen.js"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/lama.js"></script>
+  <script src="js/hindernisse.js"></script>
+  <script src="js/welt.js"></script>
+  <script src="js/computer.js"></script>
+  <script src="js/spiel.js"></script>
+  <script src="js/menue.js"></script>
+</body>
+</html>
